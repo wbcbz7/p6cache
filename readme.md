@@ -16,8 +16,17 @@ One of distinct features of P6Cache is the ability of enabling L2 cache on certa
 By default, P6Cache shows current L1 and L2 cache status, example:
 
 ```
-
+Pentium II/III/Celeron L2 Cache management utility v0.01 -- wbcbz7 o9.o7.2022
+portions from coreboot project (c) whatever-2022
+--------------------------------------------
+CPU family 6, model 5, stepping 0, CPUID is supported
+CPU vendor GenuineIntel, extended family 0, extended model 0
+L1 cache: enabled, write-through, CR0=00000011
+L2 cache: enabled, present, not configured, 1 banks 256 KB each, latency 5
+          512 MB cacheable, no ECC, full speed, 4-way, BBL_CR_CTL3=0100250A
 ```
+
+Besides CPUID info (vendor string, family/model/stepping), current L1/L2 status is displayed, like cache configuration, current latency, cacheable memory range, as well as CR0 and BBL_CR_CTL3 MSR registers content. In this case, the CPU is Pentium II Deschutes running as 66x2.0, with L2 cache not configured by BIOS (hence the bogus L2 config values) 
 
 Available command line switches are:
 
@@ -26,6 +35,28 @@ Available command line switches are:
 * `-l, --latency=[num]` - override L2 latency to [num], valid range is 0..15, and reconfigure L2 cache. Note that not all latency values are valid; if CPU's cache controller does not support particular latency setting, the L2 cache would not initialize and will left disabled. In that case, try increase or decrease latency setting and restart P6Cache again.
 * `-f, --force` - force L2 cache reconfiguration; useful if CPU reports no cache, but it's physically available (be sure to check CPU cartridge' traces are not scratched or strap resistors broken!)
 * `-r, --ring3` - ignore warnings if CPU is not in ring 0. Relies on PM supervisor allowing to access MSR registers under ring 3 (which is almost always not the case, although you may try this switch anyway)
+
+For example, `p6cache --l2=on --latency=6`, on said PII yields following output:
+
+```
+Pentium II/III/Celeron L2 Cache management utility v0.01 -- wbcbz7 o9.o7.2022
+portions from coreboot project (c) whatever-2022
+--------------------------------------------
+CPU family 6, model 5, stepping 0, CPUID is supported
+CPU vendor GenuineIntel, extended family 0, extended model 0
+L1 cache: enabled, write-through, CR0=00000011
+L2 cache: enabled, present, not configured, 1 banks 256 KB each, latency 5
+          512 MB cacheable, no ECC, full speed, 4-way, BBL_CR_CTL3=0100250A
+Configuring L2 cache... rdmsr(IA32_PLATFORM_ID) = 8001ef2:901dd142
+L2 Cache latency is 6
+write_l2(4, 0)
+size 512K... L2 Cache lines initialized
+done.
+L2 cache enabled.
+L1 cache: enabled, write-through, CR0=00000011
+L2 cache: enabled, present, configured, 1 banks 512 KB each, latency 6
+          4096 MB cacheable, ECC, full speed, 4-way, BBL_CR_CTL3=0134452D
+```
 
 
 
